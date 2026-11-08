@@ -69,15 +69,15 @@ footer{padding:8vh 56px;border-top:1px solid #c2a05055;color:var(--blue);font-si
 .frame{position:absolute;inset:22px;border:1px solid #c2a05077;pointer-events:none;z-index:50}
 .frame:after{content:"";position:absolute;inset:6px;border:1px solid #c2a05033}
 .queue{position:absolute;left:0;top:0;width:100%;height:calc(100% - 120px)}
-.card{position:absolute;left:24%;top:50%;height:min(56vh,540px);aspect-ratio:1/1;margin:calc(min(56vh,540px)/-2) 0 0 calc(min(56vh,540px)/-2);will-change:transform,filter,opacity}
+.card{position:absolute;left:0;top:0;transform-origin:50% 50%;will-change:transform,filter,opacity}
 .card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;box-shadow:0 30px 60px #000a}
 .card:before{content:"";position:absolute;inset:-12px;border:1px solid var(--gold);opacity:.7;pointer-events:none}
-.card i{position:absolute;left:-12px;bottom:-40px;font:italic 400 18px Cormorant Garamond,serif;color:var(--gold);letter-spacing:.2em}
+.card i{opacity:0;transition:opacity .6s;position:absolute;left:-12px;bottom:-40px;font:italic 400 18px Cormorant Garamond,serif;color:var(--gold);letter-spacing:.2em}
 .rail{position:absolute;left:44px;right:44px;bottom:44px;height:76px;overflow:hidden;z-index:40;border-top:1px solid #c2a05066;padding-top:12px}
 .rt{display:flex;gap:10px;will-change:transform}
 .rt img{flex:none;width:52px;height:52px;object-fit:cover;opacity:.4;transition:opacity .5s,transform .5s var(--ease);pointer-events:none}
 .rt img.on{opacity:1;transform:translateY(-4px)}
-.cnt{position:absolute;right:56px;top:46px;z-index:40;font:italic 300 20px Cormorant Garamond,serif;color:var(--gold);letter-spacing:.25em}
+.card.front i{opacity:1}.cnt{position:absolute;right:56px;top:46px;z-index:40;font:italic 300 20px Cormorant Garamond,serif;color:var(--gold);letter-spacing:.25em}
 @media(max-width:900px){
 .wrap{grid-template-columns:48% 52%}
 .brand{width:48%;min-width:0;padding:14px 12px}.brand b{font-size:19px}.brand i{display:none}
@@ -93,7 +93,7 @@ li{padding:12px 0 12px 30px;font-size:15px}li:before{font-size:18px;top:10px}
 .soc{grid-template-columns:1fr}.soc a{padding:12px;font-size:11px}
 blockquote{font-size:19px;padding-left:14px}
 footer{padding:5vh 12px;font-size:10px}
-.card{--ch:min(46vw,50vh);left:50%;top:44%;height:var(--ch);margin:calc(var(--ch)/-2) 0 0 calc(var(--ch)*-.5)}
+
 .card:before{inset:-7px}.card i{font-size:13px;bottom:-26px;left:-7px}
 .queue{height:calc(100% - 64px)}
 .rail{left:10px;right:10px;bottom:12px;height:48px;padding-top:8px}.rt{gap:6px}.rt img{width:30px;height:30px}
@@ -129,37 +129,47 @@ footer{padding:5vh 12px;font-size:10px}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
 <script>
-const N=11,F=['c01.jpg','c02.jpg','c03.jpg','c04.jpg','c05.jpg','c06.jpg','c07.jpg','c08.jpg','c09.jpg','c10.jpg','c11.png'],$=id=>document.getElementById(id),src=i=>'pix/'+F[i];
+const N=11,F=['c01.jpg','c02.jpg','c03.jpg','c04.jpg','c05.jpg','c06.jpg','c07.jpg','c08.jpg','c09.jpg','c10.jpg','c11.png'];
+const $=id=>document.getElementById(id),src=i=>'pix/'+F[i];
 const q=$('queue'),rt=$('rt'),stage=$('stage'),ghost=$('ghost'),cnt=$('cnt'),cur=$('cur');
 const cards=[],thumbs=[];
-for(let i=0;i<N;i++){const c=document.createElement('div');c.className='card';c.innerHTML=`<img src="${src(i)}" alt="Украшение ${i+1}" draggable="false"><i>N° ${String(i+1).padStart(2,'0')}</i>`;q.appendChild(c);cards.push(c);
-const t=new Image();t.src=src(i);t.alt='';rt.appendChild(t);thumbs.push(t)}
+for(let i=0;i<N;i++){const c=document.createElement('div');c.className='card';c.innerHTML=`<img src="${src(i)}" alt="Украшение ${i+1}" draggable="false"><i>N° ${String(i+1).padStart(2,'0')}</i>`;q.appendChild(c);cards.push(c)}
+for(let k=0;k<3;k++)for(let i=0;i<N;i++){const t=new Image();t.src=src(i);t.alt='';rt.appendChild(t);thumbs.push(t)}
 document.querySelectorAll('[data-split]').forEach(h=>{let n=0;const walk=nd=>{[...nd.childNodes].forEach(x=>{if(x.nodeType===3){const f=document.createDocumentFragment();x.textContent.split(/(\s+)/).forEach(p=>{if(!p.trim()){f.append(p);return}const w=document.createElement('span');w.className='w';w.innerHTML=`<span style="--i:${n++}">${p}</span>`;f.append(w)});x.replaceWith(f)}else walk(x)})};walk(h)});
 const io=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('in')),{threshold:.25});
 document.querySelectorAll('section').forEach(s=>io.observe(s));
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const lenis=reduce?null:new Lenis({lerp:.085,smoothWheel:true});
-let target=0,pos=0,W=0,H=0;
+let target=0,pos=0,W=0,H=0,w0=0,cx=0;
 const mob=()=>innerWidth<=900;
-function measure(){W=stage.clientWidth;H=stage.clientHeight}
-function progress(){const m=document.documentElement.scrollHeight-innerHeight;return m>0?Math.min(1,Math.max(0,scrollY/m)):0}
+const STEP=()=>innerHeight*.5; /* высота прокрутки на одну карточку */
+function measure(){W=stage.clientWidth;H=stage.clientHeight;const qh=H-(mob()?64:120);
+ w0=mob()?Math.min(W*.66,qh*.62):Math.min(qh*.7,W*.31);cx=mob()?W*.40:W*.27;
+ cards.forEach(c=>{c.style.width=c.style.height=w0+'px'})}
+const SC=.76,LN=-Math.log(SC);
 function render(p){
- const step=mob()?.07:.09,unit=mob()?.95:1;
- cards.forEach((c,i)=>{const d=i-p;let x,y,s,b,o;
-  if(d>=0){s=Math.pow(.82,d);x=W*step*(1-Math.pow(.8,d))/.2*unit;y=-H*.05*(1-Math.pow(.8,d))/.2*unit;b=Math.min(d*2.4,10);o=Math.max(0,1-d*.1)}
-  else{const t=Math.min(1,-d);s=1+t*.1;x=-t*W*.5;y=t*H*.03;b=t*8;o=1-t}
-  c.style.transform=`translate3d(${x}px,${y}px,0) scale(${s}) rotate(${d>=0?Math.min(d,6)*1.4:Math.max(d,-1)*9}deg)`;c.style.filter=b>.05?`blur(${b}px)`:'none';c.style.opacity=o;c.style.zIndex=100-Math.round(d*10)+(d<0?-50:0);c.style.visibility=o<=0.01?'hidden':'visible'});
- const tw=thumbs[0].offsetWidth+10,idx=Math.round(p);
- rt.style.transform=`translateX(${-p*tw + (rt.parentElement.clientWidth/2 - tw/2)}px)`;
- thumbs.forEach((t,i)=>t.classList.toggle('on',i===idx));
- ghost.style.transform=`translate(${-p*W*.03}px,-50%)`;
+ const qh=H-(mob()?64:120),cy=qh*(mob()?.5:.52),idx=((Math.round(p)%N)+N)%N;
+ cards.forEach((c,i)=>{
+  const d=((i-p+1)%N+N)%N-1; /* от -1 до N-1, бесконечный круг */
+  let x,s,b,o;
+  if(d>=0){s=Math.pow(SC,d);x=w0*1.05*(1-s)/LN;b=d<.02?0:Math.min(14,d*2.2+d*d*.35);o=Math.max(0,1-Math.max(0,d-3.2)*.5)}
+  else{const t=Math.min(1,-d);s=1+t*.08;x=-t*(cx+w0*.4);b=t*10;o=1-t}
+  const y=cy-w0/2+w0*(1-s)/2;
+  c.style.transform=`translate3d(${cx-w0/2+x}px,${y}px,0) scale(${s})`;
+  c.style.filter=b>.05?`blur(${b}px)`:'none';c.style.opacity=o;
+  c.style.zIndex=1000-Math.round((d+1)*10);c.style.visibility=o<=.01?'hidden':'visible';
+  c.classList.toggle('front',i===idx)});
+ const tw=thumbs[0].offsetWidth+10,m=((p%N)+N)%N;
+ rt.style.transform=`translateX(${-(N*tw+m*tw)+(rt.parentElement.clientWidth/2-tw/2)}px)`;
+ thumbs.forEach((t,i)=>t.classList.toggle('on',i%N===idx));
+ ghost.style.transform=`translate(${-(p%N)*W*.02}px,-50%)`;
  cnt.textContent=`${String(idx+1).padStart(2,'0')} / ${N}`}
-function tick(t){lenis&&lenis.raf(t);target=progress()*(N-1);pos+=(target-pos)*.09;if(Math.abs(target-pos)<.0005)pos=target;render(pos);requestAnimationFrame(tick)}
-addEventListener('resize',measure);measure();requestAnimationFrame(tick);
+function tick(t){lenis&&lenis.raf(t);target=scrollY/STEP();pos+=(target-pos)*.1;if(Math.abs(target-pos)<.0005)pos=target;render(pos);requestAnimationFrame(tick)}
+addEventListener('resize',()=>{measure()});measure();requestAnimationFrame(tick);
 let down=false,lx=0;
 stage.addEventListener('pointerdown',e=>{down=true;lx=e.clientX;stage.classList.add('drag')});
 addEventListener('pointerup',()=>{down=false;stage.classList.remove('drag')});
-addEventListener('pointermove',e=>{cur.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;if(!down)return;const dx=e.clientX-lx;lx=e.clientX;const k=(document.documentElement.scrollHeight-innerHeight)/(N-1)/160;
- const to=scrollY-dx*k*1;lenis?lenis.scrollTo(to,{immediate:true}):scrollTo(0,to)});
+addEventListener('pointermove',e=>{cur.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;if(!down)return;const dx=e.clientX-lx;lx=e.clientX;
+ const to=Math.max(0,scrollY-dx*STEP()/140);lenis?lenis.scrollTo(to,{immediate:true}):scrollTo(0,to)});
 document.querySelectorAll('a,.stage').forEach(a=>{a.addEventListener('mouseenter',()=>cur.classList.add('big'));a.addEventListener('mouseleave',()=>cur.classList.remove('big'))});
 </script></body></html>
