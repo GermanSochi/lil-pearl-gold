@@ -69,13 +69,13 @@ footer{padding:8vh 56px;border-top:1px solid #c2a05055;color:var(--blue);font-si
 .frame{position:absolute;inset:22px;border:1px solid #c2a05077;pointer-events:none;z-index:50}
 .frame:after{content:"";position:absolute;inset:6px;border:1px solid #c2a05033}
 .queue{position:absolute;left:0;top:0;width:100%;height:calc(100% - 120px)}
-.card{position:absolute;left:24%;top:50%;height:min(62vh,640px);aspect-ratio:3/4;margin:calc(min(62vh,640px)/-2) 0 0 calc(min(62vh,640px)*-.375);will-change:transform,filter,opacity}
+.card{position:absolute;left:24%;top:50%;height:min(56vh,540px);aspect-ratio:1/1;margin:calc(min(56vh,540px)/-2) 0 0 calc(min(56vh,540px)/-2);will-change:transform,filter,opacity}
 .card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;box-shadow:0 30px 60px #000a}
 .card:before{content:"";position:absolute;inset:-12px;border:1px solid var(--gold);opacity:.7;pointer-events:none}
 .card i{position:absolute;left:-12px;bottom:-40px;font:italic 400 18px Cormorant Garamond,serif;color:var(--gold);letter-spacing:.2em}
 .rail{position:absolute;left:44px;right:44px;bottom:44px;height:76px;overflow:hidden;z-index:40;border-top:1px solid #c2a05066;padding-top:12px}
 .rt{display:flex;gap:10px;will-change:transform}
-.rt img{flex:none;width:48px;height:62px;object-fit:cover;opacity:.4;transition:opacity .5s,transform .5s var(--ease);pointer-events:none}
+.rt img{flex:none;width:52px;height:52px;object-fit:cover;opacity:.4;transition:opacity .5s,transform .5s var(--ease);pointer-events:none}
 .rt img.on{opacity:1;transform:translateY(-4px)}
 .cnt{position:absolute;right:56px;top:46px;z-index:40;font:italic 300 20px Cormorant Garamond,serif;color:var(--gold);letter-spacing:.25em}
 @media(max-width:900px){
@@ -93,10 +93,10 @@ li{padding:12px 0 12px 30px;font-size:15px}li:before{font-size:18px;top:10px}
 .soc{grid-template-columns:1fr}.soc a{padding:12px;font-size:11px}
 blockquote{font-size:19px;padding-left:14px}
 footer{padding:5vh 12px;font-size:10px}
-.card{--ch:min(60vw,54vh);left:50%;top:44%;height:var(--ch);margin:calc(var(--ch)/-2) 0 0 calc(var(--ch)*-.375)}
+.card{--ch:min(46vw,50vh);left:50%;top:44%;height:var(--ch);margin:calc(var(--ch)/-2) 0 0 calc(var(--ch)*-.5)}
 .card:before{inset:-7px}.card i{font-size:13px;bottom:-26px;left:-7px}
 .queue{height:calc(100% - 64px)}
-.rail{left:10px;right:10px;bottom:12px;height:48px;padding-top:8px}.rt{gap:6px}.rt img{width:28px;height:36px}
+.rail{left:10px;right:10px;bottom:12px;height:48px;padding-top:8px}.rt{gap:6px}.rt img{width:30px;height:30px}
 .frame{inset:8px}.frame:after{inset:4px}.cnt{display:none}.ghost{font-size:30vw}}
 @media(prefers-reduced-motion:reduce){.curtain{display:none}.w>span,.fade{transition:none;transform:none;opacity:1}.candle{animation:none}}
 </style></head><body>
@@ -124,12 +124,12 @@ footer{padding:5vh 12px;font-size:10px}
 <footer>Pearl &amp; Gold · Москва · 2026</footer>
 </main>
 <aside class="right"><div class="stage" id="stage"><div class="ghost" id="ghost">03.12</div><div class="candle"></div>
-<div class="queue" id="queue"></div><div class="cnt" id="cnt">01 / 12</div>
+<div class="queue" id="queue"></div><div class="cnt" id="cnt">01 / 11</div>
 <div class="rail"><div class="rt" id="rt"></div></div><div class="frame"></div></div></aside>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
 <script>
-const N=12,$=id=>document.getElementById(id),src=i=>`pix/p${String(i+1).padStart(2,'0')}.jpg`;
+const N=11,F=['c01.jpg','c02.jpg','c03.jpg','c04.jpg','c05.jpg','c06.jpg','c07.jpg','c08.jpg','c09.jpg','c10.jpg','c11.png'],$=id=>document.getElementById(id),src=i=>'pix/'+F[i];
 const q=$('queue'),rt=$('rt'),stage=$('stage'),ghost=$('ghost'),cnt=$('cnt'),cur=$('cur');
 const cards=[],thumbs=[];
 for(let i=0;i<N;i++){const c=document.createElement('div');c.className='card';c.innerHTML=`<img src="${src(i)}" alt="Украшение ${i+1}" draggable="false"><i>N° ${String(i+1).padStart(2,'0')}</i>`;q.appendChild(c);cards.push(c);
@@ -148,7 +148,7 @@ function render(p){
  cards.forEach((c,i)=>{const d=i-p;let x,y,s,b,o;
   if(d>=0){s=Math.pow(.82,d);x=W*step*(1-Math.pow(.8,d))/.2*unit;y=-H*.05*(1-Math.pow(.8,d))/.2*unit;b=Math.min(d*2.4,10);o=Math.max(0,1-d*.1)}
   else{const t=Math.min(1,-d);s=1+t*.1;x=-t*W*.5;y=t*H*.03;b=t*8;o=1-t}
-  c.style.transform=`translate3d(${x}px,${y}px,0) scale(${s})`;c.style.filter=b>.05?`blur(${b}px)`:'none';c.style.opacity=o;c.style.zIndex=100-Math.round(d*10)+(d<0?-50:0);c.style.visibility=o<=0.01?'hidden':'visible'});
+  c.style.transform=`translate3d(${x}px,${y}px,0) scale(${s}) rotate(${d>=0?Math.min(d,6)*1.4:Math.max(d,-1)*9}deg)`;c.style.filter=b>.05?`blur(${b}px)`:'none';c.style.opacity=o;c.style.zIndex=100-Math.round(d*10)+(d<0?-50:0);c.style.visibility=o<=0.01?'hidden':'visible'});
  const tw=thumbs[0].offsetWidth+10,idx=Math.round(p);
  rt.style.transform=`translateX(${-p*tw + (rt.parentElement.clientWidth/2 - tw/2)}px)`;
  thumbs.forEach((t,i)=>t.classList.toggle('on',i===idx));
